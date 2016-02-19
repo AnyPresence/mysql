@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"strconv"
 	"time"
 )
 
@@ -1174,8 +1175,14 @@ func (rows *binaryRows) readRow(dest []driver.Value) error {
 					continue
 				}
 
-				if rows.columns[i].flags & flagBinary == 0 {
+				if rows.columns[i].flags&flagBinary == 0 {
 					dest[i] = string(dest[i].([]byte))
+
+					if rows.columns[i].fieldType == fieldTypeDecimal || rows.columns[i].fieldType == fieldTypeNewDecimal {
+						if dest[i], err = strconv.ParseFloat(dest[i].(string), 64); err != nil {
+							return err
+						}
+					}
 				}
 				continue
 			}
