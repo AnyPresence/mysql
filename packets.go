@@ -19,6 +19,7 @@ import (
 	"math"
 	"strconv"
 	"time"
+	"unicode/utf8"
 )
 
 // Packets documentation:
@@ -1182,6 +1183,9 @@ func (rows *binaryRows) readRow(dest []driver.Value) error {
 						if dest[i], err = strconv.ParseFloat(dest[i].(string), 64); err != nil {
 							return err
 						}
+					} else if rows.columns[i].fieldType == fieldTypeBit {
+						r, _ := utf8.DecodeRuneInString(dest[i].(string))
+						dest[i] = int64(r)
 					}
 				}
 				continue
