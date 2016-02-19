@@ -1167,13 +1167,17 @@ func (rows *binaryRows) readRow(dest []driver.Value) error {
 			var n int
 			dest[i], isNull, n, err = readLengthEncodedString(data[pos:])
 			pos += n
+
 			if err == nil {
-				if !isNull {
-					continue
-				} else {
+				if isNull {
 					dest[i] = nil
 					continue
 				}
+
+				if rows.columns[i].flags & flagBinary == 0 {
+					dest[i] = string(dest[i].([]byte))
+				}
+				continue
 			}
 			return err
 
